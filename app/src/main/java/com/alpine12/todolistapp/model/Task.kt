@@ -1,5 +1,6 @@
 package com.alpine12.todolistapp.model
 
+
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
