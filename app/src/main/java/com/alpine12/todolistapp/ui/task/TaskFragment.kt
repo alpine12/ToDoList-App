@@ -13,6 +13,7 @@ import com.alpine12.todolistapp.R
 import com.alpine12.todolistapp.databinding.FragmentTaskBinding
 import com.alpine12.todolistapp.util.OnQueryTextListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
 @AndroidEntryPoint
@@ -20,6 +21,7 @@ class TaskFragment : Fragment(R.layout.fragment_task) {
 
     private val viewModel: TaskViewModel by viewModels()
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -56,6 +58,8 @@ class TaskFragment : Fragment(R.layout.fragment_task) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_sort_by_name -> {
+
+                viewModel.sortOrder.value = SortOrder.BY_NAME
                 true
             }
 
@@ -65,6 +69,7 @@ class TaskFragment : Fragment(R.layout.fragment_task) {
 
             R.id.action_hide_completed_task -> {
                 item.isChecked = !item.isChecked
+                viewModel.hideCompleted.value = item.isChecked
                 true
             }
 

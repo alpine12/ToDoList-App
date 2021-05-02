@@ -1,13 +1,23 @@
 package com.alpine12.todolistapp.model
 
 import androidx.room.*
+import com.alpine12.todolistapp.ui.task.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
 
-    @Query("Select * from task_table where name like '%' || :searchQuery || '%' order by important ")
-    fun getTask(searchQuery: String): Flow<List<Task>>
+    fun getTask(query: String, sortOrder: SortOrder, hideCompleted: Boolean): Flow<List<Task>> =
+        when (sortOrder) {
+            SortOrder.BY_DATE -> getTaskSortedByDateCreated(query, hideCompleted)
+            SortOrder.BY_NAME -> getTaskSortedByName(query, hideCompleted)
+        }
+
+    @Query("SELECT * fROM task_table WHERE (completed != :hideCompleted OR completed = 0) AND name LIKE '%' || :searchQuery || '%' ORDER BY important, name ")
+    fun getTaskSortedByName(searchQuery: String, hideCompleted: Boolean): Flow<List<Task>>
+
+    @Query("SELECT * fROM task_table WHERE (completed != :hideCompleted OR completed = 0) AND name LIKE '%' || :searchQuery || '%' ORDER BY important, name ")
+    fun getTaskSortedByDateCreated(searchQuery: String, hideCompleted: Boolean): Flow<List<Task>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(task: Task)
