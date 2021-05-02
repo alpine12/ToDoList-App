@@ -64,6 +64,7 @@ class TaskFragment : Fragment(R.layout.fragment_task) {
             }
 
             R.id.action_sort_by_date -> {
+                viewModel.sortOrder.value = SortOrder.BY_DATE
                 true
             }
 
