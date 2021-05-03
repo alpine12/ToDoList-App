@@ -1,4 +1,4 @@
-package com.alpine12.todolistapp.model
+package com.alpine12.todolistapp.data
 
 
 import android.os.Parcelable

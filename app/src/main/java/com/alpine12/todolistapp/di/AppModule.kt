@@ -2,7 +2,7 @@ package com.alpine12.todolistapp.di
 
 import android.app.Application
 import androidx.room.Room
-import com.alpine12.todolistapp.model.TaskDatabase
+import com.alpine12.todolistapp.data.TaskDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,7 +1,6 @@
-package com.alpine12.todolistapp.model
+package com.alpine12.todolistapp.data
 
 import androidx.room.*
-import com.alpine12.todolistapp.ui.task.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 @Dao

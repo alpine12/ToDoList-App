@@ -87,7 +87,7 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:$hilt_viewModel_version"
 
     //DataStore
-    implementation "androidx.datastore:datastore:1.0.0-alpha08"
+    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha01"
 }
 kapt {
     correctErrorTypes true
