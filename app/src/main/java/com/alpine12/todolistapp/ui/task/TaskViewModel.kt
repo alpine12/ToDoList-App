@@ -5,6 +5,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.alpine12.todolistapp.data.PreferenceManager
 import com.alpine12.todolistapp.data.SortOrder
+import com.alpine12.todolistapp.data.Task
 import com.alpine12.todolistapp.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,16 +34,22 @@ class TaskViewModel @Inject constructor(
             taskDao.getTask(query, filterPreferences.sortOrder, filterPreferences.hideCompleted)
         }
 
+    @ExperimentalCoroutinesApi
+    val task = taskFlow.asLiveData()
+
     fun onSortOrderSelected(sortOrder: SortOrder) {
         viewModelScope.launch {
             preferenceManager.updateSortOrder(sortOrder)
         }
     }
 
-    fun onHideCompletedClick(hideCompleted : Boolean)= viewModelScope.launch {
+    fun onHideCompletedClick(hideCompleted: Boolean) = viewModelScope.launch {
         preferenceManager.updateHideCompleted(hideCompleted)
     }
+    fun onTaskSelected(task : Task) {}
 
-    @ExperimentalCoroutinesApi
-    val task = taskFlow.asLiveData()
+    fun onTaskCheckedChanged(task : Task, isChecked : Boolean) = viewModelScope.launch {
+        taskDao.update(task.copy(completed = isChecked))
+    }
+
 }

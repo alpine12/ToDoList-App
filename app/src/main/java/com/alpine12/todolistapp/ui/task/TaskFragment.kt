@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alpine12.todolistapp.R
 import com.alpine12.todolistapp.data.SortOrder
+import com.alpine12.todolistapp.data.Task
 import com.alpine12.todolistapp.databinding.FragmentTaskBinding
 import com.alpine12.todolistapp.util.OnQueryTextListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
-class TaskFragment : Fragment(R.layout.fragment_task) {
+class TaskFragment : Fragment(R.layout.fragment_task) , TaskAdapter.OnItemClickListener {
 
     private val viewModel: TaskViewModel by viewModels()
 
@@ -33,7 +34,7 @@ class TaskFragment : Fragment(R.layout.fragment_task) {
 
         setHasOptionsMenu(true)
 
-        val taskAdapter = TaskAdapter()
+        val taskAdapter = TaskAdapter(this)
 
         binding.apply {
             recycleViewTask.apply {
@@ -46,6 +47,14 @@ class TaskFragment : Fragment(R.layout.fragment_task) {
         viewModel.task.observe(viewLifecycleOwner) { task ->
             taskAdapter.submitList(task)
         }
+    }
+
+    override fun onItemCLick(task: Task) {
+        viewModel.onTaskSelected(task)
+    }
+
+    override fun onCheckBoxClick(task: Task, isChecked: Boolean) {
+       viewModel.onTaskCheckedChanged(task, isChecked)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
