@@ -9,20 +9,24 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.alpine12.todolistapp.R
 import com.alpine12.todolistapp.data.SortOrder
 import com.alpine12.todolistapp.data.Task
 import com.alpine12.todolistapp.databinding.FragmentTaskBinding
 import com.alpine12.todolistapp.util.OnQueryTextListener
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
-class TaskFragment : Fragment(R.layout.fragment_task) , TaskAdapter.OnItemClickListener {
+class TaskFragment : Fragment(R.layout.fragment_task), TaskAdapter.OnItemClickListener {
 
     private val viewModel: TaskViewModel by viewModels()
 
@@ -31,9 +35,6 @@ class TaskFragment : Fragment(R.layout.fragment_task) , TaskAdapter.OnItemClickL
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentTaskBinding.bind(view)
-
-        setHasOptionsMenu(true)
-
         val taskAdapter = TaskAdapter(this)
 
         binding.apply {
@@ -42,11 +43,46 @@ class TaskFragment : Fragment(R.layout.fragment_task) , TaskAdapter.OnItemClickL
                 layoutManager = LinearLayoutManager(context)
                 setHasFixedSize(true)
             }
+
+            ItemTouchHelper(object :
+                ItemTouchHelper.SimpleCallback(
+                    0,
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+                ) {
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean =
+                    false
+
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val task = taskAdapter.currentList[viewHolder.adapterPosition]
+                    viewModel.onTaskSwiped(task)
+                }
+            }).attachToRecyclerView(recycleViewTask)
         }
 
         viewModel.task.observe(viewLifecycleOwner) { task ->
             taskAdapter.submitList(task)
         }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.taskEvent.collect { event ->
+                when (event) {
+                    is TaskViewModel.TaskEvent.ShowUndoDeleteTaskMessage -> {
+                        Snackbar.make(requireView(), "Task deleted", Snackbar.LENGTH_LONG)
+                            .setAction("Undo") {
+                                viewModel.onUndoDeleteClick(event.task)
+                            }.show()
+                    }
+                }
+            }
+        }
+
+        setHasOptionsMenu(true)
     }
 
     override fun onItemCLick(task: Task) {
@@ -54,7 +90,7 @@ class TaskFragment : Fragment(R.layout.fragment_task) , TaskAdapter.OnItemClickL
     }
 
     override fun onCheckBoxClick(task: Task, isChecked: Boolean) {
-       viewModel.onTaskCheckedChanged(task, isChecked)
+        viewModel.onTaskCheckedChanged(task, isChecked)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
