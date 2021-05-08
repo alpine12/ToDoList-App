@@ -9,6 +9,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +18,7 @@ import com.alpine12.todolistapp.data.SortOrder
 import com.alpine12.todolistapp.data.Task
 import com.alpine12.todolistapp.databinding.FragmentTaskBinding
 import com.alpine12.todolistapp.util.OnQueryTextListener
+import com.alpine12.todolistapp.util.exhaustive
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,6 +65,10 @@ class TaskFragment : Fragment(R.layout.fragment_task), TaskAdapter.OnItemClickLi
                     viewModel.onTaskSwiped(task)
                 }
             }).attachToRecyclerView(recycleViewTask)
+
+            fabAddTask.setOnClickListener {
+                viewModel.onAddNewTaskClick()
+            }
         }
 
         viewModel.task.observe(viewLifecycleOwner) { task ->
@@ -78,7 +84,18 @@ class TaskFragment : Fragment(R.layout.fragment_task), TaskAdapter.OnItemClickLi
                                 viewModel.onUndoDeleteClick(event.task)
                             }.show()
                     }
-                }
+                    is TaskViewModel.TaskEvent.NavigateToAddTaskScreen -> {
+                        val action =
+                            TaskFragmentDirections.actionTaskFragment2ToAddEditTaskFragment(null,"add Task")
+                        findNavController().navigate(action)
+                    }
+                    is TaskViewModel.TaskEvent.NavigateToEditTaskScreen -> {
+                        val action =
+                            TaskFragmentDirections.actionTaskFragment2ToAddEditTaskFragment(event.task, "Edit Task")
+                        findNavController().navigate(action)
+
+                    }
+                }.exhaustive
             }
         }
 
