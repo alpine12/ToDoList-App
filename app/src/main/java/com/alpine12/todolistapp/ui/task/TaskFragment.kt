@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 class TaskFragment : Fragment(R.layout.fragment_task), TaskAdapter.OnItemClickListener {
 
     private val viewModel: TaskViewModel by viewModels()
+    private lateinit var searchView: SearchView
 
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -134,7 +135,13 @@ class TaskFragment : Fragment(R.layout.fragment_task), TaskAdapter.OnItemClickLi
         inflater.inflate(R.menu.menu_fragment_task, menu)
 
         val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+        searchView = searchItem.actionView as SearchView
+
+        val pendingQuery = viewModel.searchQuery.value
+        if (pendingQuery != null && pendingQuery.isNotEmpty()){
+            searchItem.expandActionView()
+            searchView.setQuery(pendingQuery, false)
+        }
 
         searchView.OnQueryTextListener {
             viewModel.searchQuery.value = it
@@ -170,5 +177,10 @@ class TaskFragment : Fragment(R.layout.fragment_task), TaskAdapter.OnItemClickLi
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        searchView.setOnQueryTextListener(null)
     }
 }
